@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CollectionsManager.Models;
+using CollectionsManager.Services;
+using Microsoft.Extensions.Logging;
 
 namespace CollectionsManager
 {
@@ -19,7 +21,18 @@ namespace CollectionsManager
     		builder.Logging.AddDebug();
 #endif
 
+            builder = AddDependencies(builder);
+
             return builder.Build();
+        }
+
+        private static MauiAppBuilder AddDependencies(MauiAppBuilder builder)
+        {
+            builder.Services.AddSingleton<FileService>();
+            builder.Services.AddSingleton<DataService>();
+            builder.Services.AddSingleton<CollectionsModel>();
+
+            return builder;
         }
     }
 }
