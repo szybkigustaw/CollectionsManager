@@ -73,7 +73,7 @@ namespace CollectionsManager.ViewModels
         }
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            var editing = (bool)query["editing"];
+            this.editing = (bool)query["editing"];
             if (editing)
             {
                 item_id = Guid.Parse(query["item_id"].ToString());

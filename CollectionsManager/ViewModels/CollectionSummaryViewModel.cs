@@ -54,9 +54,9 @@ namespace CollectionsManager.ViewModels
 
         private void CalculateItemCounts()
         {
-            items_owned = 0;
-            items_sold = 0;
-            items_toSell = 0;
+            ItemsOwned = 0;
+            ItemsSold = 0;
+            ItemsToSell = 0;
 
             foreach(var item in SummaryCollection.Items)
             {
@@ -68,11 +68,11 @@ namespace CollectionsManager.ViewModels
                         case "New":
                         case "Used":
                             {
-                                items_owned++;
+                                ItemsOwned++;
                             }
                             break;
-                        case "To sale": items_toSell++; break;
-                        case "Sold": items_sold++; break;
+                        case "To sale": ItemsToSell++; break;
+                        case "Sold": ItemsSold++; break;
                     }
                 }
             }
