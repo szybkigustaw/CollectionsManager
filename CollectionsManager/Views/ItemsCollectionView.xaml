@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="CollectionsManager.Views.ItemsCollectionView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:m="clr-namespace:CollectionsManager.Models"
+    xmlns:v="clr-namespace:CollectionsManager.Views">
+    <VerticalStackLayout>
+        <Label Text="{Binding Name}" />
+        <HorizontalStackLayout>
+            <Button Clicked="AddItem" Text="Add item" />
+            <Button Clicked="DisplaySummary" Text="Display summary" />
+            <Button Clicked="EditCollection" Text="Edit collection" />
+        </HorizontalStackLayout>
+        <CollectionView HeightRequest="800" ItemsSource="{Binding Items}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="m:Item">
+                    <ScrollView Padding="0,25,0,25" MaximumHeightRequest="600">
+                        <VerticalStackLayout HeightRequest="950">
+                            <HorizontalStackLayout x:Name="TitleLayout" HeightRequest="300">
+                                <Label Text="{Binding Name}" />
+                                <Image
+                                    Aspect="AspectFit"
+                                    MaximumHeightRequest="300"
+                                    MaximumWidthRequest="300"
+                                    Source="{Binding ImageStream, Mode=OneWay}" />
+                            </HorizontalStackLayout>
+                            <VerticalStackLayout MaximumHeightRequest="600">
+                                <CollectionView
+                                    ItemsSource="{Binding TextColumns}"
+                                    MaximumHeightRequest="200"
+                                    VerticalScrollBarVisibility="Default">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="m:TextColumn">
+                                            <HorizontalStackLayout>
+                                                <Label Text="{Binding Name}" />
+                                                <Label Text="{Binding Value}" />
+                                            </HorizontalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <CollectionView
+                                    ItemsSource="{Binding NumberColumns}"
+                                    MaximumHeightRequest="200"
+                                    VerticalScrollBarVisibility="Default">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="m:NumberColumn">
+                                            <HorizontalStackLayout>
+                                                <Label Text="{Binding Name}" />
+                                                <Label Text="{Binding Value}" />
+                                            </HorizontalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                                <CollectionView
+                                    ItemsSource="{Binding PickerColumns}"
+                                    MaximumHeightRequest="200"
+                                    VerticalScrollBarVisibility="Default">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="m:PickerColumn">
+                                            <HorizontalStackLayout>
+                                                <Label Text="{Binding Name}" />
+                                                <Picker
+                                                    ItemDisplayBinding="{Binding Option}"
+                                                    ItemsSource="{Binding Options}"
+                                                    SelectedItem="{Binding Value}" />
+                                            </HorizontalStackLayout>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                            <HorizontalStackLayout HeightRequest="50">
+                                <Button
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type v:ItemsCollectionView}}, Path=EditItemCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Text="Edit item" />
+                                <Button
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type v:ItemsCollectionView}}, Path=DeleteItemCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Text="Delete item" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </ScrollView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Label Text="No items" />
+            </CollectionView.EmptyView>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentView>

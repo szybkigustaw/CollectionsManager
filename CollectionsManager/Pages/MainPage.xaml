@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="CollectionsManager.Pages.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:m="clr-namespace:CollectionsManager.Models"
+    xmlns:v="clr-namespace:CollectionsManager.Views"
+    xmlns:vm="clr-namespace:CollectionsManager.ViewModels"
+    Title="Collections Manager"
+    x:DataType="vm:MainPageViewModel">
+    <VerticalStackLayout>
+        <HorizontalStackLayout
+            Margin="0,0,0,25"
+            HorizontalOptions="Center"
+            Spacing="10">
+            <Label Text="Collections:" />
+            <Label Text="{Binding Path=Model.CollectionsCount}" />
+        </HorizontalStackLayout>
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+            <Button Command="{Binding AddCollectionCommand}" Text="Add Collection" />
+            <Button Command="{Binding SaveDataCommand}" Text="Save data" />
+            <Button Command="{Binding ExportDataCommand}" Text="Export data to..." />
+            <Button Command="{Binding ImportDataCommand}" Text="Import data from..." />
+        </HorizontalStackLayout>
+        <ScrollView>
+            <CollectionView ItemsSource="{Binding Path=Model.Collections}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:ItemsCollection">
+                        <v:ItemsCollectionView
+                            Name="{Binding Name}"
+                            CollectionId="{Binding Id}"
+                            CreationDate="{Binding CreationDate}"
+                            DeleteItemCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=DeleteItemCommand}"
+                            EditItemCommand="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=EditItemCommand}"
+                            Items="{Binding Items}"
+                            ModificationDate="{Binding ModificationDate}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <ContentView>
+                        <VerticalStackLayout
+                            Margin="0,25,0,0"
+                            HorizontalOptions="Center"
+                            Spacing="20">
+                            <Label Text="No collections added" />
+                            <Label Text="Try adding a new collection" />
+                        </VerticalStackLayout>
+                    </ContentView>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </ScrollView>
+    </VerticalStackLayout>
+</ContentPage>

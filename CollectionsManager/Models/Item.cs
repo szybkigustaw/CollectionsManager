@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace CollectionsManager.Models
 {
@@ -20,6 +21,14 @@ namespace CollectionsManager.Models
         public Guid Id { get { return id; } private set { id = value; modification_date = DateTime.Now; } }
         public string Name { get { return name; } set { name = value; modification_date = DateTime.Now;} }
         public string Image { get { return image; } set { image = value; modification_date = DateTime.Now;} }
+        public ImageSource ImageStream
+        {
+            get
+            {
+                Stream stream = new MemoryStream(Convert.FromBase64String(Image));
+                return ImageSource.FromStream(() => stream);
+            }
+        }
         public List<TextColumn> TextColumns { get { return text_columns; } set { text_columns = value; modification_date = DateTime.Now;} }
         public List<NumberColumn> NumberColumns { get { return number_columns; } set { number_columns = value; modification_date = DateTime.Now;}}
         public List<PickerColumn> PickerColumns { get { return picker_Columns; } set { picker_Columns = value; modification_date = DateTime.Now;} }

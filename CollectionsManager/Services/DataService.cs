@@ -177,5 +177,93 @@ namespace CollectionsManager.Services
 
         private void HandleFileLoadingError(object sender, Exception ex)
             => OnLoadError(ex);
+
+        public ItemsCollection MoveSoldToEnd(ItemsCollection collection)
+        {
+            List<Item> itemsList = collection.Items.ToList();
+
+            List<Item> soldItems = itemsList.Where(i => i.PickerColumns.Where(c => c.Name == "Status" && c.Value.Option == "Sold").Any()).ToList();
+            List<Item> unsoldItems = itemsList.Where(
+                    i => i.PickerColumns.Where(
+                            c => c.Name == "Status" && c.Value.Option == "Sold"
+                        ).Count() == 0 ||
+                        i.PickerColumns.Where(c => c.Name == "Status").Count() == 0
+                ).ToList();
+
+            List<Item> sortedList = new List<Item>();
+            sortedList.AddRange(unsoldItems);
+            sortedList.AddRange(soldItems);
+
+            collection.Items = new System.Collections.ObjectModel.ObservableCollection<Item>(sortedList);
+            return collection;
+        }
+
+        public ItemsCollection NormalizeColumns(ItemsCollection collection)
+        {
+            List<TextColumn> textColumns = collection.Items.First().TextColumns;
+            List<NumberColumn> numberColumns = collection.Items.First().NumberColumns;
+            List<PickerColumn> pickerColumns = collection.Items.First().PickerColumns;
+
+            foreach(var item in collection.Items)
+            {
+                List<TextColumn> textColumnsMissingInItem = textColumns.Where(
+                        t => item.TextColumns.Where(T => T.Name == t.Name).Count() == 0
+                        ).ToList();
+                List<TextColumn> textColumnsMissingInList = item.TextColumns.Where(
+                        t => textColumns.Where(T => T.Name == t.Name).Count() == 0
+                        ).ToList();
+
+                foreach(var textColumn in textColumnsMissingInItem)
+                {
+                    item.TextColumns.Add(new TextColumn(textColumn.Name));
+                }
+                foreach(var textColumn in textColumnsMissingInList)
+                {
+                    textColumns.Add(new TextColumn(textColumn.Name));
+                }
+
+                List<NumberColumn> numberColumnsMissingInItem = numberColumns.Where(
+                        t => item.NumberColumns.Where(T => T.Name == t.Name).Count() == 0
+                        ).ToList();
+                List<NumberColumn> numberColumnsMissingInList = item.NumberColumns.Where(
+                        t => numberColumns.Where(T => T.Name == t.Name).Count() == 0
+                        ).ToList();
+
+                foreach(var numberColumn in numberColumnsMissingInItem)
+                {
+                    item.NumberColumns.Add(new NumberColumn(numberColumn.Name));
+                }
+                foreach(var numberColumn in numberColumnsMissingInList)
+                {
+                    numberColumns.Add(new NumberColumn(numberColumn.Name));
+                }
+
+                List<PickerColumn> pickerColumnsMissingInItem = pickerColumns.Where(
+                        t => item.PickerColumns.Where(T => T.Name == t.Name).Count() == 0
+                        ).ToList();
+                List<PickerColumn> pickerColumnsMissingInList = item.PickerColumns.Where(
+                        t => pickerColumns.Where(T => T.Name == t.Name).Count() == 0
+                        ).ToList();
+
+                foreach(var pickerColumn in pickerColumnsMissingInItem)
+                {
+                    item.PickerColumns.Add(new PickerColumn(pickerColumn.Name, pickerColumn.Options.Select(o => o.Option).ToList())
+                    {
+                        Value = pickerColumn.Options.First()
+                    });
+                }
+                foreach(var pickerColumn in pickerColumnsMissingInList)
+                {
+                    pickerColumns.Add(new PickerColumn(pickerColumn.Name, pickerColumn.Options.Select(o => o.Option).ToList()) 
+                    {
+                        Value = pickerColumn.Options.First()
+                    });
+                }
+    
+            }
+
+            return collection;
+        }
+
     }
 }
