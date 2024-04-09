@@ -5,36 +5,57 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:m="clr-namespace:CollectionsManager.Models"
     xmlns:v="clr-namespace:CollectionsManager.Views">
-    <VerticalStackLayout>
-        <Label Text="{Binding Name}" />
-        <HorizontalStackLayout>
+    <VerticalStackLayout Margin="0,25,0,0">
+        <Label
+            Margin="0,0,0,25"
+            FontSize="30"
+            HorizontalOptions="Center"
+            Text="{Binding Name}" />
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="25">
             <Button Clicked="AddItem" Text="Add item" />
             <Button Clicked="DisplaySummary" Text="Display summary" />
             <Button Clicked="EditCollection" Text="Edit collection" />
         </HorizontalStackLayout>
-        <CollectionView HeightRequest="800" ItemsSource="{Binding Items}">
+        <CollectionView
+            HeightRequest="800"
+            HorizontalOptions="Center"
+            ItemsSource="{Binding Items}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="m:Item">
                     <ScrollView Padding="0,25,0,25" MaximumHeightRequest="600">
                         <VerticalStackLayout HeightRequest="950">
-                            <HorizontalStackLayout x:Name="TitleLayout" HeightRequest="300">
-                                <Label Text="{Binding Name}" />
+                            <HorizontalStackLayout
+                                x:Name="TitleLayout"
+                                HeightRequest="300"
+                                HorizontalOptions="Center"
+                                Spacing="100">
+                                <Label
+                                    FontSize="25"
+                                    Text="{Binding Name}"
+                                    VerticalOptions="Center" />
                                 <Image
                                     Aspect="AspectFit"
                                     MaximumHeightRequest="300"
                                     MaximumWidthRequest="300"
                                     Source="{Binding ImageStream, Mode=OneWay}" />
                             </HorizontalStackLayout>
-                            <VerticalStackLayout MaximumHeightRequest="600">
+                            <VerticalStackLayout
+                                Margin="0,25,0,0"
+                                HorizontalOptions="Center"
+                                MaximumHeightRequest="600"
+                                Spacing="30">
                                 <CollectionView
                                     ItemsSource="{Binding TextColumns}"
                                     MaximumHeightRequest="200"
                                     VerticalScrollBarVisibility="Default">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="m:TextColumn">
-                                            <HorizontalStackLayout>
+                                            <HorizontalStackLayout
+                                                Margin="0,5,0,5"
+                                                HorizontalOptions="Center"
+                                                Spacing="25">
                                                 <Label Text="{Binding Name}" />
-                                                <Label Text="{Binding Value}" />
+                                                <Label FontAttributes="Bold" Text="{Binding Value}" />
                                             </HorizontalStackLayout>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
@@ -45,9 +66,12 @@
                                     VerticalScrollBarVisibility="Default">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="m:NumberColumn">
-                                            <HorizontalStackLayout>
+                                            <HorizontalStackLayout
+                                                Margin="0,5,0,5"
+                                                HorizontalOptions="Center"
+                                                Spacing="25">
                                                 <Label Text="{Binding Name}" />
-                                                <Label Text="{Binding Value}" />
+                                                <Label FontAttributes="Bold" Text="{Binding Value}" />
                                             </HorizontalStackLayout>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
@@ -58,8 +82,11 @@
                                     VerticalScrollBarVisibility="Default">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="m:PickerColumn">
-                                            <HorizontalStackLayout>
-                                                <Label Text="{Binding Name}" />
+                                            <HorizontalStackLayout
+                                                Margin="0,5,0,5"
+                                                HorizontalOptions="Center"
+                                                Spacing="25">
+                                                <Label Text="{Binding Name}" VerticalOptions="Center" />
                                                 <Picker
                                                     ItemDisplayBinding="{Binding Option}"
                                                     ItemsSource="{Binding Options}"
@@ -69,7 +96,11 @@
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>
                             </VerticalStackLayout>
-                            <HorizontalStackLayout HeightRequest="50">
+                            <HorizontalStackLayout
+                                Margin="0,25,0,0"
+                                HeightRequest="50"
+                                HorizontalOptions="Center"
+                                Spacing="50">
                                 <Button
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type v:ItemsCollectionView}}, Path=EditItemCommand}"
                                     CommandParameter="{Binding Id}"

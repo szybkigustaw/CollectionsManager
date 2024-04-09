@@ -9,34 +9,43 @@
     x:DataType="vm:AddItemViewModel">
     <ScrollView>
         <VerticalStackLayout>
-            <HorizontalStackLayout>
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
                 <Label Text="Name" />
-                <Entry Text="{Binding Name}" />
+                <Entry Text="{Binding Name}" WidthRequest="500" />
             </HorizontalStackLayout>
-            <HorizontalStackLayout x:Name="ImageRow">
+            <HorizontalStackLayout
+                x:Name="ImageRow"
+                Margin="0,50,0,0"
+                HorizontalOptions="Center"
+                Spacing="50">
                 <Label Text="Image" />
                 <Button Command="{Binding SelectImageFromFileCommand}" Text="Select from file" />
                 <Label Text="{Binding ImagePath}" />
             </HorizontalStackLayout>
             <CollectionView
+                Margin="0,50,0,0"
                 HeightRequest="300"
                 ItemsSource="{Binding TextColumns}"
                 VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
-                    <Label Margin="0,0,0,50" Text="Text Columns" />
+                    <Label
+                        Margin="0,0,0,50"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="Text Columns" />
                 </CollectionView.Header>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:TextColumn">
                         <VerticalStackLayout>
-                            <HorizontalStackLayout>
-                                <Label Text="Column name" />
-                                <Entry Text="{Binding Name}" />
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+                                <Label Text="Column name" VerticalOptions="Center" />
+                                <Entry Text="{Binding Name}" WidthRequest="500" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
-                                <Label Text="Column value" />
-                                <Entry Text="{Binding Value}" />
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+                                <Label Text="Column value" VerticalOptions="Center" />
+                                <Entry Text="{Binding Value}" WidthRequest="500" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
+                            <HorizontalStackLayout Margin="0,20,0,0" HorizontalOptions="Center">
                                 <Button
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=RemoveTextColumnCommand}"
                                     CommandParameter="{Binding Id}"
@@ -54,28 +63,36 @@
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
                 <CollectionView.Footer>
-                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddTextColumnCommand}" Text="Add new column" />
+                    <Button
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddTextColumnCommand}"
+                        Text="Add new column"
+                        WidthRequest="800" />
                 </CollectionView.Footer>
             </CollectionView>
             <CollectionView
+                Margin="0,100,0,0"
                 HeightRequest="300"
                 ItemsSource="{Binding NumberColumns}"
                 VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
-                    <Label Margin="0,0,0,50" Text="Number Columns" />
+                    <Label
+                        Margin="0,0,0,50"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="Number Columns" />
                 </CollectionView.Header>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:NumberColumn">
                         <VerticalStackLayout>
-                            <HorizontalStackLayout>
-                                <Label Text="Column name" />
-                                <Entry Text="{Binding Name}" />
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+                                <Label Text="Column name" VerticalOptions="Center" />
+                                <Entry Text="{Binding Name}" WidthRequest="500" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
-                                <Label Text="Column value" />
-                                <Entry Keyboard="Numeric" Text="{Binding Value}" />
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+                                <Label Text="Column value" VerticalOptions="Center" />
+                                <Entry Text="{Binding Value}" WidthRequest="500" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
+                            <HorizontalStackLayout Margin="0,20,0,0" HorizontalOptions="Center">
                                 <Button
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=RemoveNumberColumnCommand}"
                                     CommandParameter="{Binding Id}"
@@ -93,54 +110,71 @@
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
                 <CollectionView.Footer>
-                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddNumberColumnCommand}" Text="Add new column" />
+                    <Button
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddNumberColumnCommand}"
+                        Text="Add new column"
+                        WidthRequest="800" />
                 </CollectionView.Footer>
             </CollectionView>
             <CollectionView
+                Margin="0,100,0,0"
                 HeightRequest="300"
                 ItemsSource="{Binding PickerColumns}"
                 VerticalScrollBarVisibility="Always">
                 <CollectionView.Header>
-                    <Label Margin="0,0,0,50" Text="Picker Columns" />
+                    <Label
+                        Margin="0,0,0,50"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="Picker Columns" />
                 </CollectionView.Header>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:PickerColumn">
                         <VerticalStackLayout>
-                            <HorizontalStackLayout>
-                                <Label Text="Column name" />
-                                <Entry Text="{Binding Name}" />
+                            <HorizontalStackLayout
+                                Margin="0,50,0,0"
+                                HorizontalOptions="Center"
+                                Spacing="50">
+                                <Label Text="Column name" VerticalOptions="Center" />
+                                <Entry Text="{Binding Name}" WidthRequest="500" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
-                                <Label Text="Column value" />
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+                                <Label Text="Column value" VerticalOptions="Center" />
                                 <Picker
                                     ItemDisplayBinding="{Binding Option}"
                                     ItemsSource="{Binding Options}"
-                                    SelectedItem="{Binding Value}" />
+                                    SelectedItem="{Binding Value}"
+                                    WidthRequest="500" />
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
-                                <ScrollView>
-                                    <CollectionView ItemsSource="{Binding Options}">
+                            <HorizontalStackLayout HorizontalOptions="Center">
+                                <ScrollView Margin="0,50,0,0" HorizontalOptions="Center">
+                                    <CollectionView HorizontalOptions="Center" ItemsSource="{Binding Options}">
                                         <CollectionView.Header>
-                                            <Label Text="Column Options" />
+                                            <Label
+                                                FontSize="16"
+                                                HorizontalOptions="Center"
+                                                Text="Column Options" />
                                         </CollectionView.Header>
                                         <CollectionView.ItemTemplate>
                                             <DataTemplate x:DataType="m:PickerColumnOption">
-                                                <HorizontalStackLayout>
-                                                    <Entry Text="{Binding Option}" />
+                                                <HorizontalStackLayout HorizontalOptions="Center" Spacing="50">
+                                                    <Entry Text="{Binding Option}" WidthRequest="300" />
                                                     <Button CommandParameter="{Binding Id}" Text="Remove option" />
                                                 </HorizontalStackLayout>
                                             </DataTemplate>
                                         </CollectionView.ItemTemplate>
                                         <CollectionView.Footer>
                                             <Button
+                                                Margin="0,25,0,0"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddPickerColumnOptionCommand}"
                                                 CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type m:PickerColumn}}, Path=Id}"
+                                                HorizontalOptions="Center"
                                                 Text="Add option" />
                                         </CollectionView.Footer>
                                     </CollectionView>
                                 </ScrollView>
                             </HorizontalStackLayout>
-                            <HorizontalStackLayout>
+                            <HorizontalStackLayout Margin="0,20,0,0" HorizontalOptions="Center">
                                 <Button
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=RemovePickerColumnCommand}"
                                     CommandParameter="{Binding Id}"
@@ -158,10 +192,17 @@
                     </VerticalStackLayout>
                 </CollectionView.EmptyView>
                 <CollectionView.Footer>
-                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddPickerColumnCommand}" Text="Add new column" />
+                    <Button
+                        Margin="0,50,0,0"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddPickerColumnCommand}"
+                        Text="Add new column"
+                        WidthRequest="800" />
                 </CollectionView.Footer>
             </CollectionView>
-            <HorizontalStackLayout>
+            <HorizontalStackLayout
+                Margin="0,100,0,0"
+                HorizontalOptions="Center"
+                Spacing="100">
                 <Button Command="{Binding SaveItemCommand}" Text="Add item" />
                 <Button Command="{Binding ResetFieldsCommand}" Text="Reset fields" />
                 <Button Command="{Binding CancelCommand}" Text="Cancel" />

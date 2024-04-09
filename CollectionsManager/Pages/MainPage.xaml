@@ -22,8 +22,8 @@
             <Button Command="{Binding ExportDataCommand}" Text="Export data to..." />
             <Button Command="{Binding ImportDataCommand}" Text="Import data from..." />
         </HorizontalStackLayout>
-        <ScrollView>
-            <CollectionView ItemsSource="{Binding Path=Model.Collections}">
+        <ScrollView HorizontalOptions="FillAndExpand">
+            <CollectionView HorizontalOptions="CenterAndExpand" ItemsSource="{Binding Path=Model.Collections}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:ItemsCollection">
                         <v:ItemsCollectionView

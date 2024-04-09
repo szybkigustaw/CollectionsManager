@@ -6,12 +6,21 @@
     xmlns:vm="clr-namespace:CollectionsManager.ViewModels"
     Title="Edit Collection"
     x:DataType="vm:EditCollectionViewModel">
-    <VerticalStackLayout>
-        <HorizontalStackLayout>
+    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+        <HorizontalStackLayout
+            HorizontalOptions="CenterAndExpand"
+            Spacing="100"
+            WidthRequest="600">
             <Label Text="Name:" />
-            <Entry Text="{Binding Name}" />
+            <Entry
+                HorizontalOptions="CenterAndExpand"
+                Text="{Binding Name}"
+                WidthRequest="600" />
         </HorizontalStackLayout>
-        <HorizontalStackLayout>
+        <HorizontalStackLayout
+            Margin="0,30,0,0"
+            HorizontalOptions="Center"
+            Spacing="25">
             <Button Command="{Binding SaveCollectionCommand}" Text="Save collection" />
             <Button Command="{Binding ResetFieldsCommand}" Text="Reset fields" />
             <Button Command="{Binding CancelCommand}" Text="Cancel" />

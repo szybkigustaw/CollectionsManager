@@ -7,19 +7,32 @@
     Title="Collection Summary"
     x:DataType="vm:CollectionSummaryViewModel">
     <VerticalStackLayout>
-        <Label Text="{Binding Path=SummaryCollection.Name}" />
-        <HorizontalStackLayout Spacing="25">
+        <Label HorizontalOptions="Center" Text="{Binding Path=SummaryCollection.Name}" />
+        <HorizontalStackLayout
+            Margin="0,10,0,10"
+            HorizontalOptions="Center"
+            Spacing="25">
             <Label Text="Items owned:" />
             <Label Text="{Binding ItemsOwned}" />
         </HorizontalStackLayout>
-        <HorizontalStackLayout Spacing="25">
+        <HorizontalStackLayout
+            Margin="0,10,0,10"
+            HorizontalOptions="Center"
+            Spacing="25">
             <Label Text="Items sold:" />
             <Label Text="{Binding ItemsSold}" />
         </HorizontalStackLayout>
-        <HorizontalStackLayout Spacing="25">
+        <HorizontalStackLayout
+            Margin="0,10,0,10"
+            HorizontalOptions="Center"
+            Spacing="25">
             <Label Text="Items to sell:" />
             <Label Text="{Binding ItemsToSell}" />
         </HorizontalStackLayout>
-        <Button Command="{Binding GoBackCommand}" Text="Go back" />
+        <Button
+            Padding="5,5,5,5"
+            Command="{Binding GoBackCommand}"
+            HorizontalOptions="Center"
+            Text="Go back" />
     </VerticalStackLayout>
 </ContentPage>
