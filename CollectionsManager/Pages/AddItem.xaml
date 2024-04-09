@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="CollectionsManager.Pages.AddItem"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:m="clr-namespace:CollectionsManager.Models"
+    xmlns:vm="clr-namespace:CollectionsManager.ViewModels"
+    Title="Add Item"
+    x:DataType="vm:AddItemViewModel">
+    <ScrollView>
+        <VerticalStackLayout>
+            <HorizontalStackLayout>
+                <Label Text="Name" />
+                <Entry Text="{Binding Name}" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout x:Name="ImageRow">
+                <Label Text="Image" />
+                <Button Command="{Binding SelectImageFromFileCommand}" Text="Select from file" />
+                <Label Text="{Binding ImagePath}" />
+            </HorizontalStackLayout>
+            <CollectionView
+                HeightRequest="300"
+                ItemsSource="{Binding TextColumns}"
+                VerticalScrollBarVisibility="Always">
+                <CollectionView.Header>
+                    <Label Margin="0,0,0,50" Text="Text Columns" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:TextColumn">
+                        <VerticalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label Text="Column name" />
+                                <Entry Text="{Binding Name}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label Text="Column value" />
+                                <Entry Text="{Binding Value}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Button
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=RemoveTextColumnCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Text="Delete column" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout>
+                        <Label
+                            HorizontalOptions="Center"
+                            Text="No columns"
+                            VerticalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.Footer>
+                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddTextColumnCommand}" Text="Add new column" />
+                </CollectionView.Footer>
+            </CollectionView>
+            <CollectionView
+                HeightRequest="300"
+                ItemsSource="{Binding NumberColumns}"
+                VerticalScrollBarVisibility="Always">
+                <CollectionView.Header>
+                    <Label Margin="0,0,0,50" Text="Number Columns" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:NumberColumn">
+                        <VerticalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label Text="Column name" />
+                                <Entry Text="{Binding Name}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label Text="Column value" />
+                                <Entry Keyboard="Numeric" Text="{Binding Value}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Button
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=RemoveNumberColumnCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Text="Delete column" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout>
+                        <Label
+                            HorizontalOptions="Center"
+                            Text="No columns"
+                            VerticalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.Footer>
+                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddNumberColumnCommand}" Text="Add new column" />
+                </CollectionView.Footer>
+            </CollectionView>
+            <CollectionView
+                HeightRequest="300"
+                ItemsSource="{Binding PickerColumns}"
+                VerticalScrollBarVisibility="Always">
+                <CollectionView.Header>
+                    <Label Margin="0,0,0,50" Text="Picker Columns" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="m:PickerColumn">
+                        <VerticalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label Text="Column name" />
+                                <Entry Text="{Binding Name}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Label Text="Column value" />
+                                <Picker
+                                    ItemDisplayBinding="{Binding Option}"
+                                    ItemsSource="{Binding Options}"
+                                    SelectedItem="{Binding Value}" />
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <ScrollView>
+                                    <CollectionView ItemsSource="{Binding Options}">
+                                        <CollectionView.Header>
+                                            <Label Text="Column Options" />
+                                        </CollectionView.Header>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="m:PickerColumnOption">
+                                                <HorizontalStackLayout>
+                                                    <Entry Text="{Binding Option}" />
+                                                    <Button CommandParameter="{Binding Id}" Text="Remove option" />
+                                                </HorizontalStackLayout>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                        <CollectionView.Footer>
+                                            <Button
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddPickerColumnOptionCommand}"
+                                                CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type m:PickerColumn}}, Path=Id}"
+                                                Text="Add option" />
+                                        </CollectionView.Footer>
+                                    </CollectionView>
+                                </ScrollView>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout>
+                                <Button
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=RemovePickerColumnCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    Text="Delete column" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout>
+                        <Label
+                            HorizontalOptions="Center"
+                            Text="No columns"
+                            VerticalOptions="Center" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+                <CollectionView.Footer>
+                    <Button Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AddItemViewModel}}, Path=AddPickerColumnCommand}" Text="Add new column" />
+                </CollectionView.Footer>
+            </CollectionView>
+            <HorizontalStackLayout>
+                <Button Command="{Binding SaveItemCommand}" Text="Add item" />
+                <Button Command="{Binding ResetFieldsCommand}" Text="Reset fields" />
+                <Button Command="{Binding CancelCommand}" Text="Cancel" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

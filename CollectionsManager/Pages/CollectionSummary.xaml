@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="CollectionsManager.Pages.CollectionSummary"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:CollectionsManager.ViewModels"
+    Title="Collection Summary"
+    x:DataType="vm:CollectionSummaryViewModel">
+    <VerticalStackLayout>
+        <Label Text="{Binding Path=SummaryCollection.Name}" />
+        <HorizontalStackLayout Spacing="25">
+            <Label Text="Items owned:" />
+            <Label Text="{Binding ItemsOwned}" />
+        </HorizontalStackLayout>
+        <HorizontalStackLayout Spacing="25">
+            <Label Text="Items sold:" />
+            <Label Text="{Binding ItemsSold}" />
+        </HorizontalStackLayout>
+        <HorizontalStackLayout Spacing="25">
+            <Label Text="Items to sell:" />
+            <Label Text="{Binding ItemsToSell}" />
+        </HorizontalStackLayout>
+        <Button Command="{Binding GoBackCommand}" Text="Go back" />
+    </VerticalStackLayout>
+</ContentPage>

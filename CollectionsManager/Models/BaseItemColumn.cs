@@ -8,14 +8,17 @@ namespace CollectionsManager.Models
 {
     public abstract class BaseItemColumn<T>
     {
+        private Guid id;
         private string name;
         private T? value;
 
         public string Name { get { return name; } set { name = value; } }
         public T Value { get { return value; } set { this.value = value; } }
+        public Guid Id { get { return id; } set { id = value; } }
 
         public BaseItemColumn(string name)
         {
+            Id = Guid.NewGuid();
             Name = name;
             Value = default(T);
         }

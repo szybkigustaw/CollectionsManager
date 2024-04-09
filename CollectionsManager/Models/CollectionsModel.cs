@@ -11,9 +11,11 @@ namespace CollectionsManager.Models
 {
     public class CollectionsModel : INotifyPropertyChanged
     {
-        private ObservableCollection<ItemsCollection> _collections;
+        private ObservableCollection<ItemsCollection> _collections = new ObservableCollection<ItemsCollection>();
+        private int _collectionsCount;
 
         public ObservableCollection<ItemsCollection> Collections { get { return _collections; } set { SetProperty(ref _collections, value); } }
+        public int CollectionsCount { get => _collectionsCount; set { SetProperty(ref _collectionsCount, value); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -31,5 +33,18 @@ namespace CollectionsManager.Models
             return true;
         }
        
+        public void AddCollection(ItemsCollection collection)
+        {
+            Collections.Add(collection);
+            CollectionsCount = Collections.Count();
+        }
+
+        public void ReplaceCollection(ItemsCollection old_collection, ItemsCollection new_collection)
+        {
+            int index = Collections.IndexOf(old_collection);
+            Collections.RemoveAt(index);
+            Collections.Insert(index, new_collection);
+            CollectionsCount = Collections.Count();
+        }
     }
 }

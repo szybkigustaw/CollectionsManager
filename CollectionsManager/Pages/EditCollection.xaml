@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="CollectionsManager.Pages.EditCollection"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:CollectionsManager.ViewModels"
+    Title="Edit Collection"
+    x:DataType="vm:EditCollectionViewModel">
+    <VerticalStackLayout>
+        <HorizontalStackLayout>
+            <Label Text="Name:" />
+            <Entry Text="{Binding Name}" />
+        </HorizontalStackLayout>
+        <HorizontalStackLayout>
+            <Button Command="{Binding SaveCollectionCommand}" Text="Save collection" />
+            <Button Command="{Binding ResetFieldsCommand}" Text="Reset fields" />
+            <Button Command="{Binding CancelCommand}" Text="Cancel" />
+            <Button Command="{Binding DeleteCollectionCommand}" Text="Delete collection" />
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
+</ContentPage>
