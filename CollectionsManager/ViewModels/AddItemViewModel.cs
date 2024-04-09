@@ -217,6 +217,7 @@ namespace CollectionsManager.ViewModels
                 new_collection = _dataService.NormalizeColumns(new_collection);
                 new_collection = _dataService.MoveSoldToEnd(new_collection);
                 _model.ReplaceCollection(collection, new_collection);
+                _dataService.SaveData();
 
                 Debug.WriteLine($"Collections count: {_model.CollectionsCount}");
                 Debug.WriteLine($"Items count: {_model.Collections.First(x => x.Id == _collection_id).Items.Count()}");
@@ -247,6 +248,7 @@ namespace CollectionsManager.ViewModels
                 new_collection = _dataService.NormalizeColumns(new_collection);
                 new_collection = _dataService.MoveSoldToEnd(new_collection);
                 _model.ReplaceCollection(collection, new_collection);
+                _dataService.SaveData();
 #if DEBUG
                 Debug.WriteLine($"Collections count: {_model.CollectionsCount}");
                 Debug.WriteLine($"Items count: {_model.Collections.First(x => x.Id == _collection_id).Items.Count()}");

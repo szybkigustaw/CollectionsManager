@@ -49,6 +49,9 @@ namespace CollectionsManager.Services
         public void SaveData()
             => _fileService.SaveData(_model.Collections.ToList());
 
+        public void LoadData()
+            => _fileService.LoadData();
+
         public async Task<bool> ExportData()
         {
             try 
@@ -106,6 +109,7 @@ namespace CollectionsManager.Services
                     if (result.FileName.EndsWith("txt", StringComparison.OrdinalIgnoreCase) )
                     {
                         _fileService.LoadDataFrom(result.FullPath);
+                        SaveData();
                         return true;
                     }
                 }
@@ -130,6 +134,7 @@ namespace CollectionsManager.Services
                     if (result.FileName.EndsWith("txt", StringComparison.OrdinalIgnoreCase) )
                     {
                         _fileService.LoadDataFrom(result.FullPath);
+                        SaveData();
                         return true;
                     }
                 }
@@ -153,11 +158,12 @@ namespace CollectionsManager.Services
                     {
                         if (_model.Collections.Where(c => c.Id == collection.Id).Count() > 0)
                         {
-                            throw new Exception("There is already the same collection in the app data!");
+                            ItemsCollection altered_collection = new ItemsCollection(Guid.NewGuid(), collection.Name, collection.Items.ToList(), collection.CreationDate);
+                            _model.AddCollection(altered_collection);
                         }
                         else
                         {
-                            _model.Collections.Add(collection);
+                            _model.AddCollection(collection);
                         }
                     }
 
