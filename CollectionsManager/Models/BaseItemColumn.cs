@@ -22,5 +22,19 @@ namespace CollectionsManager.Models
             Name = name;
             Value = default(T);
         }
+
+        public BaseItemColumn(Guid id, string name, T value)
+        {
+            Id = id;
+            Name = name;
+            Value = value;
+        }
+
+        public BaseItemColumn(Guid id, string name)
+        {
+            Id = id;
+            Name = name;
+            Value = default(T);
+        }
     }
 }

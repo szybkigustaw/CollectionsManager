@@ -14,7 +14,7 @@ namespace CollectionsManager.Models
         private ObservableCollection<ItemsCollection> _collections = new ObservableCollection<ItemsCollection>();
         private int _collectionsCount;
 
-        public ObservableCollection<ItemsCollection> Collections { get { return _collections; } set { SetProperty(ref _collections, value); } }
+        public ObservableCollection<ItemsCollection> Collections { get { return _collections; } set { SetProperty(ref _collections, value); SetProperty(ref _collectionsCount, value.Count()); } }
         public int CollectionsCount { get => _collectionsCount; set { SetProperty(ref _collectionsCount, value); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -45,6 +45,13 @@ namespace CollectionsManager.Models
             Collections.RemoveAt(index);
             Collections.Insert(index, new_collection);
             CollectionsCount = Collections.Count();
+        }
+
+        public void AddItem(ItemsCollection collection, Item item)
+        {
+            ItemsCollection new_collection = collection;
+            new_collection.Items.Add(item);
+            ReplaceCollection(collection, new_collection);
         }
     }
 }

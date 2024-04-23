@@ -38,6 +38,13 @@ namespace CollectionsManager.Models
                 Options.Add(new PickerColumnOption(item));
             }    
         }
+        public PickerColumn(Guid id, string name, List<PickerColumnOption> options, PickerColumnOption value) : base(id, name) 
+        {
+            Id = id;
+            Name = name;
+            Value = value;
+            Options = new ObservableCollection<PickerColumnOption>(options);
+        }
     }
 
     public class PickerColumnOption
@@ -51,6 +58,12 @@ namespace CollectionsManager.Models
         public PickerColumnOption(string option)
         {
             Id = Guid.NewGuid();
+            Option = option;
+        }
+
+        public PickerColumnOption(Guid id, string option)
+        {
+            Id = id;
             Option = option;
         }
     }

@@ -8,9 +8,16 @@ namespace CollectionsManager
         {
             InitializeComponent();
 
-            dataService.LoadData();
+            dataService.LoadError += HandleLoadError;
 
             MainPage = new AppShell();
+
+            dataService.LoadData();
+        }
+
+        private async void HandleLoadError(object sender, Exception ex)
+        {
+            await MainPage.DisplayAlert("Data load error", ex.Message, "OK");
         }
     }
 }

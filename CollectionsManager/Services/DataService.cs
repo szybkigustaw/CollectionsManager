@@ -18,7 +18,7 @@ namespace CollectionsManager.Services
         private static FilePickerFileType FILE_TYPE = new FilePickerFileType(
                 new Dictionary<DevicePlatform, IEnumerable<string>>
                 {
-                    {DevicePlatform.WinUI, new[] { ".txt" } }
+                    {DevicePlatform.WinUI, new[] { ".xml" } }
                 }
             );
 
@@ -59,7 +59,7 @@ namespace CollectionsManager.Services
                 var result = await FilePicker.Default.PickAsync(PICK_OPTIONS);
                 if(result != null) 
                 {
-                    if (result.FileName.EndsWith("txt", StringComparison.OrdinalIgnoreCase) )
+                    if (result.FileName.EndsWith("xml", StringComparison.OrdinalIgnoreCase) )
                     {
                         _fileService.SaveDataTo(_model.Collections.ToList(), result.FullPath);
                         return true;
@@ -82,7 +82,7 @@ namespace CollectionsManager.Services
                 var result = await FilePicker.Default.PickAsync(PICK_OPTIONS);
                 if(result != null) 
                 {
-                    if (result.FileName.EndsWith("txt", StringComparison.OrdinalIgnoreCase) )
+                    if (result.FileName.EndsWith("xml", StringComparison.OrdinalIgnoreCase) )
                     {
                         _fileService.SaveDataTo(new List<ItemsCollection> { collection }, result.FullPath);
                         return true;
@@ -106,7 +106,7 @@ namespace CollectionsManager.Services
                 var result = await FilePicker.Default.PickAsync(PICK_OPTIONS);
                 if(result != null) 
                 {
-                    if (result.FileName.EndsWith("txt", StringComparison.OrdinalIgnoreCase) )
+                    if (result.FileName.EndsWith("xml", StringComparison.OrdinalIgnoreCase) )
                     {
                         _fileService.LoadDataFrom(result.FullPath);
                         SaveData();
@@ -131,7 +131,7 @@ namespace CollectionsManager.Services
                 var result = await FilePicker.Default.PickAsync(PICK_OPTIONS);
                 if(result != null) 
                 {
-                    if (result.FileName.EndsWith("txt", StringComparison.OrdinalIgnoreCase) )
+                    if (result.FileName.EndsWith("xml", StringComparison.OrdinalIgnoreCase) )
                     {
                         _fileService.LoadDataFrom(result.FullPath);
                         SaveData();
@@ -158,8 +158,21 @@ namespace CollectionsManager.Services
                     {
                         if (_model.Collections.Where(c => c.Id == collection.Id).Count() > 0)
                         {
-                            ItemsCollection altered_collection = new ItemsCollection(Guid.NewGuid(), collection.Name, collection.Items.ToList(), collection.CreationDate);
-                            _model.AddCollection(altered_collection);
+                            ItemsCollection old_collection = _model.Collections.Where(c => c.Id == collection.Id).First();
+                            ItemsCollection modified_collection = _model.Collections.Where(c => c.Id == collection.Id).First();
+                            foreach(Item item in collection.Items)
+                            {
+                                if(modified_collection.Items.Where(i => i.Id == item.Id).Count() > 0)
+                                {
+                                    modified_collection.Items.Add(new Item(Guid.NewGuid(), item.Name, item.Image, item.TextColumns, item.NumberColumns, item.PickerColumns, item.AddDate));
+                                }
+                                else
+                                {
+                                    modified_collection.Items.Add(item);
+                                }
+                            }
+
+                            _model.ReplaceCollection(old_collection, modified_collection);
                         }
                         else
                         {
@@ -173,6 +186,7 @@ namespace CollectionsManager.Services
                 else
                 {
                     _model.Collections = new System.Collections.ObjectModel.ObservableCollection<ItemsCollection>(collections);
+                    OnSucessfulLoad();
                 }
             }
             catch (Exception ex)

@@ -23,7 +23,10 @@
             <Button Command="{Binding ImportDataCommand}" Text="Import data from..." />
         </HorizontalStackLayout>
         <ScrollView HorizontalOptions="FillAndExpand">
-            <CollectionView HorizontalOptions="CenterAndExpand" ItemsSource="{Binding Path=Model.Collections}">
+            <CollectionView
+                HeightRequest="900"
+                HorizontalOptions="CenterAndExpand"
+                ItemsSource="{Binding Path=Model.Collections}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="m:ItemsCollection">
                         <v:ItemsCollectionView

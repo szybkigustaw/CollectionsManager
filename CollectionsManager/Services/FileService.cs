@@ -6,20 +6,20 @@ using System.Linq;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace CollectionsManager.Services
 {
     public class FileService
     {
-        private const string COLLECTION_DELIM = "#$$#";
-        private const string COLLECTION_DATA_DELIM = ";;";
-        private const string COLLECTION_ITEMS_DELIM = ",,";
-        private const string ITEM_DATA_DELIM = ";*;";
-        private const string ITEM_COLUMNS_DELIM = "$$";
-        private const string COLUMN_DATA_DELIM = ",*,";
-        private const string PICKER_COLUMN_OPTIONS_DELIM = "$*$";
-
-        private readonly string _baseFilePath = Path.Combine(FileSystem.AppDataDirectory, "collections.txt");
+        private readonly string _baseFilePath = Path.Combine(FileSystem.AppDataDirectory, "collections.xml");
+        private char COLUMN_DATA_DELIM = '!';
+        private char ITEM_COLUMNS_DELIM = '!';
+        private char PICKER_COLUMN_OPTIONS_DELIM = '!';
+        private char ITEM_DATA_DELIM = '!';
+        private char COLLECTION_ITEMS_DELIM = ' ';
+        private char COLLECTION_DELIM = '!';
+        private char COLLECTION_DATA_DELIM = '!';
 
         public event EventHandler<List<ItemsCollection>> FilesLoaded;
         public event EventHandler<Exception> LoadingError;
@@ -34,102 +34,84 @@ namespace CollectionsManager.Services
         {
             using (StreamWriter sr = new StreamWriter(_baseFilePath, false))
             {
-                int collections_count = 0; 
-                foreach (var collection in collections)
+                XElement collections_doc = new XElement("collections");
+                foreach(var collection in collections) 
                 {
-                    string stringified_collection = "";
-                    stringified_collection += collection.Id.ToString() + COLLECTION_DATA_DELIM;
-                    stringified_collection += collection.Name + COLLECTION_DATA_DELIM;
-                    stringified_collection += collection.CreationDate.ToString() + COLLECTION_DATA_DELIM;
+                    XElement collection_el = new XElement("collection");
+                    collection_el.SetAttributeValue("id", collection.Id);
+                    collection_el.SetAttributeValue("name", collection.Name);
+                    collection_el.SetAttributeValue("creation_date", collection.CreationDate);
+                    collection_el.SetAttributeValue("modification_date", collection.ModificationDate);
 
-                    string stringified_collection_items = "[";
-                    int items_count = 0;
-                    foreach (var item in collection.Items)
+                    foreach(var item in collection.Items)
                     {
-                        string stringified_item = "";
-                        stringified_item += item.Id.ToString() + ITEM_DATA_DELIM;
-                        stringified_item += item.Name + ITEM_DATA_DELIM;
-                        stringified_item += item.Image + ITEM_DATA_DELIM;
-                        stringified_item += item.AddDate.ToString() + ITEM_DATA_DELIM;
+                        XElement item_el = new XElement("item");
+                        item_el.SetAttributeValue("id", item.Id);
+                        item_el.SetAttributeValue("name", item.Name);
+                        item_el.SetAttributeValue("add_date", item.AddDate);
+                        item_el.SetAttributeValue("modification_date", item.ModificationDate);
 
-                        if (item.TextColumns.Count > 0)
+                        item_el.Add(new XElement("item_image", item.Image));
+
+                        XElement text_columns = new XElement("text_columns");
+                        foreach(var text_column in  item.TextColumns)
                         {
-                            stringified_item += "[";
+                            XElement text_column_el = new XElement("text_column");
+                            text_column_el.SetAttributeValue("id", text_column.Id);
+                            text_column_el.SetAttributeValue("name", text_column.Name);
+                            text_column_el.SetAttributeValue("value", text_column.Value);
 
-                            for (int i = 0; i < item.TextColumns.Count; i++)
+                            text_columns.Add(text_column_el);
+                        }
+                        item_el.Add(text_columns);
+
+                        XElement number_columns = new XElement("number_columns");
+                        foreach(var number_column in item.NumberColumns)
+                        {
+                            XElement number_column_el = new XElement("number_column");
+                            number_column_el.SetAttributeValue("id", number_column.Id);
+                            number_column_el.SetAttributeValue("name", number_column.Name);
+                            number_column_el.SetAttributeValue("value", number_column.Value);
+
+                            number_columns.Add(number_column_el);
+                        }
+                        item_el.Add(number_columns);
+
+                        XElement picker_columns = new XElement("picker_columns");
+                        foreach(var picker_column in item.PickerColumns)
+                        {
+                            XElement picker_column_el = new XElement("picker_column");
+                            picker_column_el.SetAttributeValue("id", picker_column.Id);
+                            picker_column_el.SetAttributeValue("name", picker_column.Name);
+
+                            XElement picker_column_value_el = new XElement("value");
+                            picker_column_value_el.SetAttributeValue("id", picker_column.Value.Id);
+                            picker_column_value_el.Add(picker_column.Value.Option);
+                            picker_column_el.Add(picker_column_value_el);
+
+                            XElement picker_column_options_el = new XElement("options");
+                            foreach(var option in picker_column.Options)
                             {
-                                var column = item.TextColumns[i];
-                                string stringified_column = column.Id + COLUMN_DATA_DELIM + column.Name + COLUMN_DATA_DELIM + column.Value;
-                                stringified_column += i < item.TextColumns.Count - 1 ? ITEM_COLUMNS_DELIM : "";
-                                stringified_item += stringified_column;
+                                XElement option_el = new XElement("option");
+                                option_el.SetAttributeValue("id", option.Id);
+                                option_el.Add(option.Option);
+                                picker_column_options_el.Add(option_el);
                             }
+                            picker_column_el.Add(picker_column_options_el);
 
-                            stringified_item += "]" + ITEM_DATA_DELIM;
+                            picker_columns.Add(picker_column_el);
                         }
-                        else
-                        {
-                            stringified_item += "[]" + ITEM_DATA_DELIM;
-                        }
+                        item_el.Add(picker_columns);
 
-                        if (item.NumberColumns.Count > 0)
-                        {
-                            stringified_item += "[";
-
-                            for (int i = 0; i < item.NumberColumns.Count; i++)
-                            {
-                                var column = item.NumberColumns[i];
-                                string stringified_column = column.Id + COLUMN_DATA_DELIM + column.Name + COLUMN_DATA_DELIM + column.Value;
-                                stringified_column += i < item.NumberColumns.Count - 1 ? ITEM_COLUMNS_DELIM : "";
-                                stringified_item += stringified_column;
-                            }
-
-                            stringified_item += "]" + ITEM_DATA_DELIM;
-                        }
-                        else
-                        {
-                            stringified_item += "[]" + ITEM_DATA_DELIM;
-                        }
-
-                        if (item.PickerColumns.Count > 0)
-                        {
-                            stringified_item += "[";
-
-                            for (int i = 0; i < item.PickerColumns.Count; i++)
-                            {
-                                var column = item.PickerColumns[i];
-                                string stringified_column = column.Id + COLUMN_DATA_DELIM + column.Name + COLUMN_DATA_DELIM + (column.Value.Option != null ? column.Value.Option : column.Options[0].Option) + COLUMN_DATA_DELIM;
-
-                                stringified_column += "[";
-                                for (int j = 0; j < column.Options.Count; j++)
-                                {
-                                    stringified_column += column.Options[j].Option;
-                                    stringified_column += j < column.Options.Count - 1 ? PICKER_COLUMN_OPTIONS_DELIM : "";
-                                }
-                                stringified_column += "]";
-
-                                stringified_column += i < item.PickerColumns.Count - 1 ? ITEM_COLUMNS_DELIM : "";
-                                stringified_item += stringified_column;
-                            }
-
-                            stringified_item += "]";
-                        }
-                        else
-                        {
-                            stringified_item += "[]";
-                        }
-
-                        stringified_collection_items += stringified_item + (items_count < collection.Items.Count() - 1 ? COLLECTION_ITEMS_DELIM : "");
+                        collection_el.Add(item_el);
                     }
 
-                    stringified_collection += stringified_collection_items + "]";
-
-#if DEBUG
-                    Debug.WriteLine($"Stringified collection: {stringified_collection}");
-#endif
-
-                    sr.Write(stringified_collection + (collections_count < collections.Count() - 1 ? COLLECTION_DELIM : "" ));
-                    collections_count++;
+                    collections_doc.Add(collection_el);
                 }
+#if DEBUG
+                Debug.WriteLine($"Saved file path: {_baseFilePath}");
+#endif
+                collections_doc.Save(sr);
             }
         }
 
@@ -137,364 +119,380 @@ namespace CollectionsManager.Services
         {
             using (StreamWriter sr = new StreamWriter(path, false))
             {
-                int collections_count = 0; 
-                foreach (var collection in collections)
+                XElement collections_doc = new XElement("collections");
+                foreach(var collection in collections) 
                 {
-                    string stringified_collection = "";
-                    stringified_collection += collection.Id.ToString() + COLLECTION_DATA_DELIM;
-                    stringified_collection += collection.Name + COLLECTION_DATA_DELIM;
-                    stringified_collection += collection.CreationDate.ToString() + COLLECTION_DATA_DELIM;
+                    XElement collection_el = new XElement("collection");
+                    collection_el.SetAttributeValue("id", collection.Id);
+                    collection_el.SetAttributeValue("name", collection.Name);
+                    collection_el.SetAttributeValue("creation_date", collection.CreationDate);
+                    collection_el.SetAttributeValue("modification_date", collection.ModificationDate);
 
-                    string stringified_collection_items = "[";
-                    int items_count = 0;
-                    foreach (var item in collection.Items)
+                    foreach(var item in collection.Items)
                     {
-                        string stringified_item = "";
-                        stringified_item += item.Id.ToString() + ITEM_DATA_DELIM;
-                        stringified_item += item.Name + ITEM_DATA_DELIM;
-                        stringified_item += item.Image + ITEM_DATA_DELIM;
-                        stringified_item += item.AddDate.ToString() + ITEM_DATA_DELIM;
+                        XElement item_el = new XElement("item");
+                        item_el.SetAttributeValue("id", item.Id);
+                        item_el.SetAttributeValue("name", item.Name);
+                        item_el.SetAttributeValue("add_date", item.AddDate);
+                        item_el.SetAttributeValue("modification_date", item.ModificationDate);
 
-                        if (item.TextColumns.Count > 0)
+                        item_el.Add(new XElement("item_image", item.Image));
+
+                        XElement text_columns = new XElement("text_columns");
+                        foreach(var text_column in  item.TextColumns)
                         {
-                            stringified_item += "[";
+                            XElement text_column_el = new XElement("text_column");
+                            text_column_el.SetAttributeValue("id", text_column.Id);
+                            text_column_el.SetAttributeValue("name", text_column.Name);
+                            text_column_el.SetAttributeValue("value", text_column.Value);
 
-                            for (int i = 0; i < item.TextColumns.Count; i++)
+                            text_columns.Add(text_column_el);
+                        }
+                        item_el.Add(text_columns);
+
+                        XElement number_columns = new XElement("number_columns");
+                        foreach(var number_column in item.NumberColumns)
+                        {
+                            XElement number_column_el = new XElement("number_column");
+                            number_column_el.SetAttributeValue("id", number_column.Id);
+                            number_column_el.SetAttributeValue("name", number_column.Name);
+                            number_column_el.SetAttributeValue("value", number_column.Value);
+
+                            number_columns.Add(number_column_el);
+                        }
+                        item_el.Add(number_columns);
+
+                        XElement picker_columns = new XElement("picker_columns");
+                        foreach(var picker_column in item.PickerColumns)
+                        {
+                            XElement picker_column_el = new XElement("picker_column");
+                            picker_column_el.SetAttributeValue("id", picker_column.Id);
+                            picker_column_el.SetAttributeValue("name", picker_column.Name);
+
+                            XElement picker_column_value_el = new XElement("value");
+                            picker_column_value_el.SetAttributeValue("id", picker_column.Value.Id);
+                            picker_column_value_el.Add(picker_column.Value.Option);
+                            picker_column_el.Add(picker_column_value_el);
+
+                            XElement picker_column_options_el = new XElement("options");
+                            foreach(var option in picker_column.Options)
                             {
-                                var column = item.TextColumns[i];
-                                string stringified_column = column.Id + COLUMN_DATA_DELIM + column.Name + COLUMN_DATA_DELIM + column.Value;
-                                stringified_column += i < item.TextColumns.Count - 1 ? ITEM_COLUMNS_DELIM : "";
-                                stringified_item += stringified_column;
+                                XElement option_el = new XElement("option");
+                                option_el.SetAttributeValue("id", option.Id);
+                                option_el.Add(option.Option);
+                                picker_column_options_el.Add(option_el);
                             }
+                            picker_column_el.Add(picker_column_options_el);
 
-                            stringified_item += "]" + ITEM_DATA_DELIM;
+                            picker_columns.Add(picker_column_el);
                         }
-                        else
-                        {
-                            stringified_item += "[]" + ITEM_DATA_DELIM;
-                        }
+                        item_el.Add(picker_columns);
 
-                        if (item.NumberColumns.Count > 0)
-                        {
-                            stringified_item += "[";
-
-                            for (int i = 0; i < item.NumberColumns.Count; i++)
-                            {
-                                var column = item.NumberColumns[i];
-                                string stringified_column = column.Id + COLUMN_DATA_DELIM + column.Name + COLUMN_DATA_DELIM + column.Value;
-                                stringified_column += i < item.NumberColumns.Count - 1 ? ITEM_COLUMNS_DELIM : "";
-                                stringified_item += stringified_column;
-                            }
-
-                            stringified_item += "]" + ITEM_DATA_DELIM;
-                        }
-                        else
-                        {
-                            stringified_item += "[]" + ITEM_DATA_DELIM;
-                        }
-
-                        if (item.PickerColumns.Count > 0)
-                        {
-                            stringified_item += "[";
-
-                            for (int i = 0; i < item.PickerColumns.Count; i++)
-                            {
-                                var column = item.PickerColumns[i];
-                                string stringified_column = column.Id + COLUMN_DATA_DELIM + column.Name + COLUMN_DATA_DELIM + (column.Value.Option != null ? column.Value.Option : column.Options[0].Option) + COLUMN_DATA_DELIM;
-
-                                stringified_column += "[";
-                                for (int j = 0; j < column.Options.Count; j++)
-                                {
-                                    stringified_column += column.Options[j].Option;
-                                    stringified_column += j < column.Options.Count - 1 ? PICKER_COLUMN_OPTIONS_DELIM : "";
-                                }
-                                stringified_column += "]";
-
-                                stringified_column += i < item.PickerColumns.Count - 1 ? ITEM_COLUMNS_DELIM : "";
-                                stringified_item += stringified_column;
-                            }
-
-                            stringified_item += "]";
-                        }
-                        else
-                        {
-                            stringified_item += "[]";
-                        }
-
-                        stringified_collection_items += stringified_item + (items_count < collection.Items.Count() - 1 ? COLLECTION_ITEMS_DELIM : "");
+                        collection_el.Add(item_el);
                     }
 
-                    stringified_collection += stringified_collection_items + "]";
-
-#if DEBUG
-                    Debug.WriteLine($"Stringified collection: {stringified_collection}");
-#endif
-
-                    sr.Write(stringified_collection + (collections_count < collections.Count() - 1 ? COLLECTION_DELIM : "" ));
-                    collections_count++;
+                    collections_doc.Add(collection_el);
                 }
+#if DEBUG
+                Debug.WriteLine($"Saved file path: {path}");
+#endif
+                collections_doc.Save(sr);
             }
         }
 
         public void LoadData()
         {
-            using (StreamReader sr = new StreamReader(_baseFilePath))
+            try
             {
-                try
-                {
-                    int collections_count = 0;
-                    List<ItemsCollection> collections = new List<ItemsCollection>();
-                    while (!sr.EndOfStream)
+                XDocument xdoc = XDocument.Load(_baseFilePath);
+                if (xdoc.Root == null) throw new InvalidDataException("There's no data in this file!");
+                XElement collections_data = xdoc.Root;
+                    try
                     {
-                        string collections_string = sr.ReadToEnd();
-                        string[] collections_string_parts = collections_string.Split(COLLECTION_DELIM);
-                        foreach (string collection_string in collections_string_parts)
-                        {
+                        int collections_count = 0;
+                        List<ItemsCollection> collections = new List<ItemsCollection>();
+                         foreach( XElement collection_data in collections_data.Elements())
+                         {
                             collections_count++;
-                            string[] collection_parts = collection_string.Split(COLLECTION_DATA_DELIM);
-                            if (collection_parts.Length != 4)
-                            {
-                                throw new Exception($"Malformed collection {collections_count}");
-                            }
+                            if(collection_data.Attribute("id") == null) throw new Exception($"Malformed collection {collections_count}");
+                            Guid collection_id = Guid.Parse(collection_data.Attribute("id").Value);
+                            if(collection_data.Attribute("name") == null) throw new Exception($"Malformed collection {collections_count}");
+                            string collection_name = collection_data.Attribute("name").Value;
+                            if(collection_data.Attribute("creation_date") == null) throw new Exception($"Malformed collection {collections_count}");
+                            DateTime collection_creation_date = DateTime.Parse(collection_data.Attribute("creation_date").Value);
 
-                            string[] collection_items = collection_parts[3].Substring(1, collection_parts[3].Length - 1).Split(COLLECTION_ITEMS_DELIM);
-
+                            List<Item> collection_items = new List<Item>();
                             int items_count = 0;
-                            List<Item> items = new List<Item>();
-                            foreach (var item in collection_items)
+                            foreach (XElement item in collection_data.Elements())
                             {
                                 items_count++;
-                                string[] item_parts = item.Split(ITEM_DATA_DELIM);
-                                if (item_parts.Length != 7)
+                               
+                                if(item.Attribute("id") == null) throw new Exception($"Malformed item {items_count} in collection {collections_count}: id");
+                                Guid item_id = Guid.Parse(item.Attribute("id").Value);
+                                if(item.Attribute("name") == null) throw new Exception($"Malformed item {items_count} in collection {collections_count}: name");
+                                string item_name = item.Attribute("name").Value;
+                                if(item.Attribute("add_date") == null) throw new Exception($"Malformed item {items_count} in collection {collections_count}: add_date");
+                                DateTime item_add_time = DateTime.Parse(item.Attribute("add_date").Value);
+
+                                XElement? item_image = item.Element("item_image");
+                                string? image;
+                                if(item_image != null && item_image.Value != null)
                                 {
-                                    throw new Exception($"Malformed item {items_count} in collection {collections_count}");
+                                    image = item_image.Value;
+                                }
+                                else
+                                {
+                                    image = null;
                                 }
 
                                 List<TextColumn> text_columns = new List<TextColumn>();
-#if DEBUG
-                                Debug.WriteLine(item_parts[4]);
-                                Debug.WriteLine(item_parts[4].Substring(1, item_parts[4].Length - 1));
-                                Debug.WriteLine(item_parts[4].Substring(1, item_parts[4].Length - 1).Split(ITEM_COLUMNS_DELIM));
-#endif
-                                string[] text_columns_strings = item_parts[4].Substring(1, item_parts[4].Length - 2).Split(ITEM_COLUMNS_DELIM);
-#if DEBUG
-                                Debug.WriteLine($"Text columns strings count: {text_columns_strings.Length}");
-#endif
-                                int text_columns_count = 0;
-                                foreach (var text_column in text_columns_strings)
-                                {
-#if DEBUG
-                                    Debug.WriteLine(text_column);
-#endif
-                                    text_columns_count++;
-                                    string[] text_column_parts = text_column.Split(COLUMN_DATA_DELIM);
-#if DEBUG
-                                Debug.WriteLine($"Text columns parts count: {text_column_parts.Length}");
-#endif
-                                    if (text_column_parts.Length != 3)
-                                    {
-                                        throw new Exception($"Malformed column {text_columns_count} in item {items_count} in collection {collections_count}");
-                                    }
-
-                                    text_columns.Add(new TextColumn(text_column_parts[1])
-                                    {
-                                        Id = Guid.Parse(text_column_parts[0]),
-                                        Value = text_column_parts[2]
-                                    });
-                                }
-
-
                                 List<NumberColumn> number_columns = new List<NumberColumn>();
-                                string[] number_columns_strings = item_parts[5].Substring(1, item_parts[5].Length - 2).Split(ITEM_COLUMNS_DELIM);
-                                int number_columns_count = text_columns_count;
-                                foreach (var number_column in number_columns_strings)
-                                {
-                                    number_columns_count++;
-                                    string[] number_column_parts = number_column.Split(COLUMN_DATA_DELIM);
-                                    if (number_column_parts.Length != 3)
-                                    {
-                                        throw new Exception($"Malformed column {number_columns_count} in item {items_count} in collection {collections_count}");
-                                    }
-
-                                    number_columns.Add(new NumberColumn(number_column_parts[1])
-                                    {
-                                        Id = Guid.Parse(number_column_parts[0]),
-                                        Value = Convert.ToDouble(number_column_parts[2])
-                                    });
-                                }
-
-
                                 List<PickerColumn> picker_columns = new List<PickerColumn>();
-                                string[] picker_columns_strings = item_parts[6].Substring(1, item_parts[6].Length - 2).Split(ITEM_COLUMNS_DELIM);
-                                int picker_columns_count = number_columns_count;
-                                foreach (var picker_column in picker_columns_strings)
+
+                                int columns_count = 0;
+
+                                XElement? text_columns_el = item.Element("text_columns");
+                                if(text_columns_el != null)
                                 {
-                                    picker_columns_count++;
-                                    string[] picker_column_parts = picker_column.Split(COLUMN_DATA_DELIM);
-                                    if (picker_column_parts.Length != 4)
+                                    foreach(XElement text_column_el in text_columns_el.Elements())
                                     {
-                                        throw new Exception($"Malformed column {picker_columns_count} in item {items_count} in collection {collections_count}");
+                                        columns_count++;
+                                        if(text_column_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        Guid text_column_id = Guid.Parse(text_column_el.Attribute("id").Value);
+                                        if(text_column_el.Attribute("name") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: name");
+                                        string text_column_name = text_column_el.Attribute("name").Value;
+                                        if(text_column_el.Attribute("value") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        string text_column_value = text_column_el.Attribute("value").Value;
+
+                                        text_columns.Add(new TextColumn(text_column_id, text_column_name, text_column_value));
                                     }
-
-                                    string[] picker_column_options_strings = picker_column_parts[3].Substring(1, picker_column_parts[3].Length - 1).Split(PICKER_COLUMN_OPTIONS_DELIM);
-
-                                    var picker_column_final = new PickerColumn(picker_column_parts[1], picker_column_options_strings.ToList())
-                                    {
-                                        Id = Guid.Parse(picker_column_parts[0]),
-                                    };
-
-                                    picker_column_final.Value = picker_column_final.Options.First(o => o.Option == picker_column_parts[2]);
-                                    picker_columns.Add(picker_column_final);
                                 }
-#if DEBUG
-                                Debug.WriteLine(item_parts[2]);
-#endif
-                                items.Add(new Item(Guid.Parse(item_parts[0]), item_parts[1], item_parts[2], text_columns, number_columns, picker_columns, Convert.ToDateTime(item_parts[3])));
-                            }
-                            collections.Add(new ItemsCollection(Guid.Parse(collection_parts[0]), collection_parts[1], items, Convert.ToDateTime(collection_parts[2])));
-                        }
-                    }
 
-                    OnFilesLoaded(collections);
-                }
-                catch (Exception ex)
-                {
+                                XElement? number_columns_el = item.Element("number_columns");
+                                if(number_columns_el != null)
+                                {
+                                    foreach(XElement number_column_el in number_columns_el.Elements())
+                                    {
+                                        columns_count++;
+                                        if(number_column_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        Guid number_column_id = Guid.Parse(number_column_el.Attribute("id").Value);
+                                        if(number_column_el.Attribute("name") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: name");
+                                        string number_column_name = number_column_el.Attribute("name").Value;
+                                        if(number_column_el.Attribute("value") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        double number_column_value = Convert.ToDouble(number_column_el.Attribute("value").Value);
+
+                                        number_columns.Add(new NumberColumn(number_column_id, number_column_name, number_column_value));
+                                    }
+                                }
+
+                                XElement? picker_columns_el = item.Element("picker_columns");
+                                if(picker_columns_el != null)
+                                {
+                                    foreach(XElement picker_column_el in picker_columns_el.Elements())
+                                    {
+                                        columns_count++;
+                                        if(picker_column_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        Guid picker_column_id = Guid.Parse(picker_column_el.Attribute("id").Value);
+                                        if(picker_column_el.Attribute("name") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        string picker_column_name = picker_column_el.Attribute("name").Value;
+
+                                        if(picker_column_el.Element("value") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        XElement picker_column_value_el = picker_column_el.Element("value");
+                                        if(picker_column_value_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        if(picker_column_value_el.Value == null || picker_column_value_el.Value == String.Empty) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+
+                                        PickerColumnOption picker_column_value = new PickerColumnOption(Guid.Parse(picker_column_value_el.Attribute("id").Value), picker_column_value_el.Value);
+                                        List<PickerColumnOption> picker_column_options = new List<PickerColumnOption>();
+
+                                        XElement? picker_column_options_el = picker_column_el.Element("options");
+                                        if(picker_column_options_el == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: options");
+                                        int options_count = 0;
+                                        foreach (XElement picker_column_option_el in picker_column_options_el.Elements())
+                                        {
+                                            options_count++;
+                                            if(picker_column_option_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: option {options_count}");
+                                            if(picker_column_option_el.Value == null || picker_column_value_el.Value == String.Empty) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: option {options_count}");
+
+                                            picker_column_options.Add(new PickerColumnOption(Guid.Parse(picker_column_option_el.Attribute("id").Value), picker_column_option_el.Value));
+                                        }
+
+                                        if(picker_column_options.Where(o => o.Id == picker_column_value.Id ).Count() == 0) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: option {options_count}");
+
+                                        picker_columns.Add(new PickerColumn(picker_column_id, picker_column_name, picker_column_options, picker_column_value));
+                                    }
+                                }
+
+                                collection_items.Add(new Item(item_id, item_name, image, text_columns, number_columns, picker_columns, item_add_time));
+                            }
+                            collections.Add(new ItemsCollection(collection_id, collection_name, collection_items, collection_creation_date));
+                         }
+
+                        OnFilesLoaded(collections);
 #if DEBUG
-                    Debug.WriteLine(ex.Message);
+                        Debug.WriteLine($"Base file path: {_baseFilePath}");
 #endif
-                    OnLoadingError(ex);
-                }
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        Debug.WriteLine(ex.Message);
+#endif
+                        OnLoadingError(ex);
+                    }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Debug.WriteLine($"Error occurred during loading data: {ex.Message}");
+#endif
             }
         }
 
         public void LoadDataFrom(string path)
         {
-            using (StreamReader sr = new StreamReader(path))
+            try
             {
-                try
-                {
-                    int collections_count = 0;
-                    List<ItemsCollection> collections = new List<ItemsCollection>();
-                    while (!sr.EndOfStream)
+                XDocument xdoc = XDocument.Load(path);
+                if (xdoc.Root == null) throw new InvalidDataException("There's no data in this file!");
+                XElement collections_data = xdoc.Root;
+                    try
                     {
-                        string collections_string = sr.ReadToEnd();
-                        string[] collections_string_parts = collections_string.Split(COLLECTION_DELIM);
-                        foreach (string collection_string in collections_string_parts)
-                        {
+                        int collections_count = 0;
+                        List<ItemsCollection> collections = new List<ItemsCollection>();
+                         foreach( XElement collection_data in collections_data.Elements())
+                         {
                             collections_count++;
-                            string[] collection_parts = collection_string.Split(COLLECTION_DATA_DELIM);
-                            if (collection_parts.Length != 4)
-                            {
-                                throw new Exception($"Malformed collection {collections_count}");
-                            }
+                            if(collection_data.Attribute("id") == null) throw new Exception($"Malformed collection {collections_count}");
+                            Guid collection_id = Guid.Parse(collection_data.Attribute("id").Value);
+                            if(collection_data.Attribute("name") == null) throw new Exception($"Malformed collection {collections_count}");
+                            string collection_name = collection_data.Attribute("name").Value;
+                            if(collection_data.Attribute("creation_date") == null) throw new Exception($"Malformed collection {collections_count}");
+                            DateTime collection_creation_date = DateTime.Parse(collection_data.Attribute("creation_date").Value);
 
-                            string[] collection_items = collection_parts[3].Substring(1, collection_parts[3].Length - 1).Split(COLLECTION_ITEMS_DELIM);
-
+                            List<Item> collection_items = new List<Item>();
                             int items_count = 0;
-                            List<Item> items = new List<Item>();
-                            foreach (var item in collection_items)
+                            foreach (XElement item in collection_data.Elements())
                             {
                                 items_count++;
-                                string[] item_parts = item.Split(ITEM_DATA_DELIM);
-                                if (item_parts.Length != 7)
+                               
+                                if(item.Attribute("id") == null) throw new Exception($"Malformed item {items_count} in collection {collections_count}: id");
+                                Guid item_id = Guid.Parse(item.Attribute("id").Value);
+                                if(item.Attribute("name") == null) throw new Exception($"Malformed item {items_count} in collection {collections_count}: name");
+                                string item_name = item.Attribute("name").Value;
+                                if(item.Attribute("add_date") == null) throw new Exception($"Malformed item {items_count} in collection {collections_count}: add_date");
+                                DateTime item_add_time = DateTime.Parse(item.Attribute("add_date").Value);
+
+                                XElement? item_image = item.Element("item_image");
+                                string? image;
+                                if(item_image != null && item_image.Value != null)
                                 {
-                                    throw new Exception($"Malformed item {items_count} in collection {collections_count}");
+                                    image = item_image.Value;
+                                }
+                                else
+                                {
+                                    image = null;
                                 }
 
                                 List<TextColumn> text_columns = new List<TextColumn>();
-#if DEBUG
-                                Debug.WriteLine(item_parts[4]);
-                                Debug.WriteLine(item_parts[4].Substring(1, item_parts[4].Length - 1));
-                                Debug.WriteLine(item_parts[4].Substring(1, item_parts[4].Length - 1).Split(ITEM_COLUMNS_DELIM));
-#endif
-                                string[] text_columns_strings = item_parts[4].Substring(1, item_parts[4].Length - 2).Split(ITEM_COLUMNS_DELIM);
-#if DEBUG
-                                Debug.WriteLine($"Text columns strings count: {text_columns_strings.Length}");
-#endif
-                                int text_columns_count = 0;
-                                foreach (var text_column in text_columns_strings)
-                                {
-#if DEBUG
-                                    Debug.WriteLine(text_column);
-#endif
-                                    text_columns_count++;
-                                    string[] text_column_parts = text_column.Split(COLUMN_DATA_DELIM);
-#if DEBUG
-                                Debug.WriteLine($"Text columns parts count: {text_column_parts.Length}");
-#endif
-                                    if (text_column_parts.Length != 3)
-                                    {
-                                        throw new Exception($"Malformed column {text_columns_count} in item {items_count} in collection {collections_count}");
-                                    }
-
-                                    text_columns.Add(new TextColumn(text_column_parts[1])
-                                    {
-                                        Id = Guid.Parse(text_column_parts[0]),
-                                        Value = text_column_parts[2]
-                                    });
-                                }
-
-
                                 List<NumberColumn> number_columns = new List<NumberColumn>();
-                                string[] number_columns_strings = item_parts[5].Substring(1, item_parts[5].Length - 2).Split(ITEM_COLUMNS_DELIM);
-                                int number_columns_count = text_columns_count;
-                                foreach (var number_column in number_columns_strings)
-                                {
-                                    number_columns_count++;
-                                    string[] number_column_parts = number_column.Split(COLUMN_DATA_DELIM);
-                                    if (number_column_parts.Length != 3)
-                                    {
-                                        throw new Exception($"Malformed column {number_columns_count} in item {items_count} in collection {collections_count}");
-                                    }
-
-                                    number_columns.Add(new NumberColumn(number_column_parts[1])
-                                    {
-                                        Id = Guid.Parse(number_column_parts[0]),
-                                        Value = Convert.ToDouble(number_column_parts[2])
-                                    });
-                                }
-
-
                                 List<PickerColumn> picker_columns = new List<PickerColumn>();
-                                string[] picker_columns_strings = item_parts[6].Substring(1, item_parts[6].Length - 2).Split(ITEM_COLUMNS_DELIM);
-                                int picker_columns_count = number_columns_count;
-                                foreach (var picker_column in picker_columns_strings)
+
+                                int columns_count = 0;
+
+                                XElement? text_columns_el = item.Element("text_columns");
+                                if(text_columns_el != null)
                                 {
-                                    picker_columns_count++;
-                                    string[] picker_column_parts = picker_column.Split(COLUMN_DATA_DELIM);
-                                    if (picker_column_parts.Length != 4)
+                                    foreach(XElement text_column_el in text_columns_el.Elements())
                                     {
-                                        throw new Exception($"Malformed column {picker_columns_count} in item {items_count} in collection {collections_count}");
+                                        columns_count++;
+                                        if(text_column_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        Guid text_column_id = Guid.Parse(text_column_el.Attribute("id").Value);
+                                        if(text_column_el.Attribute("name") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: name");
+                                        string text_column_name = text_column_el.Attribute("name").Value;
+                                        if(text_column_el.Attribute("value") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        string text_column_value = text_column_el.Attribute("value").Value;
+
+                                        text_columns.Add(new TextColumn(text_column_id, text_column_name, text_column_value));
                                     }
-
-                                    string[] picker_column_options_strings = picker_column_parts[3].Substring(1, picker_column_parts[3].Length - 1).Split(PICKER_COLUMN_OPTIONS_DELIM);
-
-                                    var picker_column_final = new PickerColumn(picker_column_parts[1], picker_column_options_strings.ToList())
-                                    {
-                                        Id = Guid.Parse(picker_column_parts[0]),
-                                    };
-
-                                    picker_column_final.Value = picker_column_final.Options.First(o => o.Option == picker_column_parts[2]);
-                                    picker_columns.Add(picker_column_final);
                                 }
-#if DEBUG
-                                Debug.WriteLine(item_parts[2]);
-#endif
-                                items.Add(new Item(Guid.Parse(item_parts[0]), item_parts[1], item_parts[2], text_columns, number_columns, picker_columns, Convert.ToDateTime(item_parts[3])));
-                            }
-                            collections.Add(new ItemsCollection(Guid.Parse(collection_parts[0]), collection_parts[1], items, Convert.ToDateTime(collection_parts[2])));
-                        }
-                    }
 
-                    OnFilesLoaded(collections);
-                }
-                catch (Exception ex)
-                {
+                                XElement? number_columns_el = item.Element("number_columns");
+                                if(number_columns_el != null)
+                                {
+                                    foreach(XElement number_column_el in number_columns_el.Elements())
+                                    {
+                                        columns_count++;
+                                        if(number_column_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        Guid number_column_id = Guid.Parse(number_column_el.Attribute("id").Value);
+                                        if(number_column_el.Attribute("name") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: name");
+                                        string number_column_name = number_column_el.Attribute("name").Value;
+                                        if(number_column_el.Attribute("value") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        double number_column_value = Convert.ToDouble(number_column_el.Attribute("value").Value);
+
+                                        number_columns.Add(new NumberColumn(number_column_id, number_column_name, number_column_value));
+                                    }
+                                }
+
+                                XElement? picker_columns_el = item.Element("picker_columns");
+                                if(picker_columns_el != null)
+                                {
+                                    foreach(XElement picker_column_el in picker_columns_el.Elements())
+                                    {
+                                        columns_count++;
+                                        if(picker_column_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        Guid picker_column_id = Guid.Parse(picker_column_el.Attribute("id").Value);
+                                        if(picker_column_el.Attribute("name") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: id");
+                                        string picker_column_name = picker_column_el.Attribute("name").Value;
+
+                                        if(picker_column_el.Element("value") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        XElement picker_column_value_el = picker_column_el.Element("value");
+                                        if(picker_column_value_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+                                        if(picker_column_value_el.Value == null || picker_column_value_el.Value == String.Empty) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: value");
+
+                                        PickerColumnOption picker_column_value = new PickerColumnOption(Guid.Parse(picker_column_value_el.Attribute("id").Value), picker_column_value_el.Value);
+                                        List<PickerColumnOption> picker_column_options = new List<PickerColumnOption>();
+
+                                        XElement? picker_column_options_el = picker_column_el.Element("options");
+                                        if(picker_column_options_el == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: options");
+                                        int options_count = 0;
+                                        foreach (XElement picker_column_option_el in picker_column_options_el.Elements())
+                                        {
+                                            options_count++;
+                                            if(picker_column_option_el.Attribute("id") == null) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: option {options_count}");
+                                            if(picker_column_option_el.Value == null || picker_column_value_el.Value == String.Empty) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: option {options_count}");
+
+                                            picker_column_options.Add(new PickerColumnOption(Guid.Parse(picker_column_option_el.Attribute("id").Value), picker_column_option_el.Value));
+                                        }
+
+                                        if(picker_column_options.Where(o => o.Id == picker_column_value.Id ).Count() == 0) throw new Exception($"Malformed column {columns_count} in item {items_count} in collection {collections_count}: option {options_count}");
+
+                                        picker_columns.Add(new PickerColumn(picker_column_id, picker_column_name, picker_column_options, picker_column_value));
+                                    }
+                                }
+
+                                collection_items.Add(new Item(item_id, item_name, image, text_columns, number_columns, picker_columns, item_add_time));
+                            }
+                            collections.Add(new ItemsCollection(collection_id, collection_name, collection_items, collection_creation_date));
+                         }
+
+                        OnFilesLoaded(collections);
 #if DEBUG
-                    Debug.WriteLine(ex.Message);
+                        Debug.WriteLine($"Base file path: {_baseFilePath}");
 #endif
-                    OnLoadingError(ex);
-                }
+                    }
+                    catch (Exception ex)
+                    {
+#if DEBUG
+                        Debug.WriteLine(ex.Message);
+#endif
+                        OnLoadingError(ex);
+                    }
+            }
+            catch (Exception ex)
+            {
+#if DEBUG
+                Debug.WriteLine($"Error occurred during loading data: {ex.Message}");
+#endif
             }
         }
     }

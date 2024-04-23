@@ -5,25 +5,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:m="clr-namespace:CollectionsManager.Models"
     xmlns:v="clr-namespace:CollectionsManager.Views">
-    <VerticalStackLayout Margin="0,25,0,0">
+    <VerticalStackLayout Margin="0,25,0,0" MaximumHeightRequest="1200">
         <Label
             Margin="0,0,0,25"
             FontSize="30"
+            HeightRequest="40"
             HorizontalOptions="Center"
             Text="{Binding Name}" />
-        <HorizontalStackLayout HorizontalOptions="Center" Spacing="25">
+        <HorizontalStackLayout
+            HeightRequest="50"
+            HorizontalOptions="Center"
+            Spacing="25">
             <Button Clicked="AddItem" Text="Add item" />
             <Button Clicked="DisplaySummary" Text="Display summary" />
             <Button Clicked="EditCollection" Text="Edit collection" />
         </HorizontalStackLayout>
         <CollectionView
-            HeightRequest="800"
+            HeightRequest="1050"
             HorizontalOptions="Center"
             ItemsSource="{Binding Items}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="m:Item">
-                    <ScrollView Padding="0,25,0,25" MaximumHeightRequest="600">
-                        <VerticalStackLayout HeightRequest="950">
+                    <ScrollView Padding="0,25,0,25" MaximumHeightRequest="1000">
+                        <VerticalStackLayout HeightRequest="1000">
                             <HorizontalStackLayout
                                 x:Name="TitleLayout"
                                 HeightRequest="300"
@@ -84,6 +88,7 @@
                                         <DataTemplate x:DataType="m:PickerColumn">
                                             <HorizontalStackLayout
                                                 Margin="0,5,0,5"
+                                                HeightRequest="50"
                                                 HorizontalOptions="Center"
                                                 Spacing="25">
                                                 <Label Text="{Binding Name}" VerticalOptions="Center" />

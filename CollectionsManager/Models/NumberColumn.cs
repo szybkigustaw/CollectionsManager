@@ -12,5 +12,12 @@ namespace CollectionsManager.Models
         {
             Name = name;
         }
+
+        public NumberColumn(Guid id, string name, double value) : base(id, name, value)
+        {
+            Id = id;
+            Name = name;
+            Value = value;
+        }
     }
 }

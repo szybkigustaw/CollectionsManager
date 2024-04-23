@@ -58,6 +58,7 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Images\image.svg" />
+	  <None Remove="Resources\Images\no_image.png" />
 	</ItemGroup>
 
 	<ItemGroup>
